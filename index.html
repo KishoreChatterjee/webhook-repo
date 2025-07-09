@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GitHub Webhook Tracker</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>GitHub Repository Events</h1>
+  <ul id="events-list"></ul>
+
+  <script>
+    async function loadEvents() {
+      const res = await fetch('/events');
+      const events = await res.json();
+      const list = document.getElementById('events-list');
+      list.innerHTML = ''; // Clear previous items
+
+      events.forEach(event => {
+        let text = '';
+        if (event.action_type === 'push') {
+          text = `${event.author} pushed to ${event.to_branch} on ${event.timestamp}`;
+        } else if (event.action_type === 'pull_request') {
+          text = `${event.author} submitted a pull request from ${event.from_branch} to ${event.to_branch} on ${event.timestamp}`;
+        } else if (event.action_type === 'merge') {
+          text = `${event.author} merged branch ${event.from_branch} to ${event.to_branch} on ${event.timestamp}`;
+        }
+
+        const li = document.createElement('li');
+        li.textContent = text;
+        list.appendChild(li);
+      });
+    }
+
+    loadEvents();
+    setInterval(loadEvents, 15000);  // Reload every 15 seconds
+  </script>
+</body>
+</html>
